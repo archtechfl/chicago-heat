@@ -13,7 +13,7 @@ class BaseStation extends React.Component {
     }
 
     componentDidMount(){
-        console.log("Base mounted");
+        // console.log("Base mounted");
     }
 
     render(){

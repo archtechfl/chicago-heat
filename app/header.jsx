@@ -3,7 +3,7 @@ import React from 'react';
 export default class Header extends React.Component {
 
     componentDidMount(){
-        console.log("Header mounted");
+        // console.log("Header mounted");
     }
 
     render(){
