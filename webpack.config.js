@@ -25,6 +25,14 @@ module.exports = {
         exclude: /node_modules/, 
         loader: ExtractTextPlugin.extract("style?sourceMap", "css?sourceMap!autoprefixer?browsers=last 5 version!less?sourceMap"),
       },
+      {
+        test: /\.css$/,
+        loader: 'css-loader',
+      },
+      {
+        test: /\.json$/,
+        loader: 'json-loader'
+      },
     ]
   },
   plugins: [
