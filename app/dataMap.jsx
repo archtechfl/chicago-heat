@@ -16,7 +16,6 @@ export default class DataMap extends React.Component {
         super(props);
         this.state = {
             crimes: "domestic_battery_simple",
-            amountCrimePerBeat: {},
             width: 800,
             height: 800,
             viewingData: []
@@ -29,10 +28,6 @@ export default class DataMap extends React.Component {
                 "name": "Murder", "data": murders
             }
         };
-    }
-
-    componentWillMount(){
-        // Determine color of area based on intensity scale
         this.state.viewingData = this.crimesTypeListing[this.state.crimes].data;
 
         for (var counter = 0; counter < this.state.viewingData.length; counter++) {
@@ -44,20 +39,70 @@ export default class DataMap extends React.Component {
             }
         }
 
-        var amountCrimePerBeat = this.state.amountCrimePerBeat;
+        var amountCrimePerBeat = {};
 
         this.state.viewingData.forEach(function(d) { 
           amountCrimePerBeat[d["beat_num"]] = d["crimes"];
         });
+
+        this.state.amountCrimePerBeat = amountCrimePerBeat;
+
+        console.log("Component constructed");
     }
 
     componentDidUpdate() {
 
         console.log(this.state);
 
+        console.log("Component updated");
+
+        var viewingData = this.crimesTypeListing[this.state.crimes].data;
+
+        for (var counter = 0; counter < viewingData.length; counter++) {
+            var beatNum = viewingData[counter]["beat_num"];
+            if (beatNum < 1000) {
+              viewingData[counter]["beat_num"] = "0" + viewingData[counter]["beat_num"];
+            } else {
+              viewingData[counter]["beat_num"] = "" + viewingData[counter]["beat_num"] + "";
+            }
+        }
+
+        var amountCrimePerBeat = {};
+
+        viewingData.forEach(function(d) { 
+          amountCrimePerBeat[d["beat_num"]] = d["crimes"];
+        });
+
+        this.state.amountCrimePerBeat = amountCrimePerBeat;
+
+        // Get data bounds
+        var max = amountCrimePerBeat.reduce((prev, current) => (prev.crimes > current.crimes) ? prev : current);
+        console.log(max);
+
+        var colorScale = d3.scaleThreshold()
+            .domain([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+            .range(['#DBDBDB','#ffffff','#fff1a1','#ffe075','#ffcb55','#ffb73c','#ffa127','#ff8815','#ff6d05','#ff4b00','#ff0000']);
+
+        this.svg = d3.select("#mapArea svg");
+
+        var amountCrimePerBeat = this.state.amountCrimePerBeat;
+
+        this.svg.selectAll("path")          
+                    .attr("fill", function(d) { 
+                        var noDataColor = "#DBDBDB";
+                        var color = colorScale(amountCrimePerBeat[d["properties"]["beat_num"]]);
+                        if (!color) {
+                            return noDataColor;
+                        } else {
+                            return color;
+                        }
+                    });
+
     }
 
     componentDidMount(){
+
+        console.log("Component mounted");
 
         // Get geographic data
         var geoJsonObj = beats;
@@ -76,8 +121,8 @@ export default class DataMap extends React.Component {
                         t = [(this.state.width - s * (b[1][0] + b[0][0])) / 2, (this.state.height - s * (b[1][1] + b[0][1])) / 2];
 
         var colorScale = d3.scaleThreshold()
-            .domain([35, 70, 105, 140, 175, 210, 245, 280, 315, 350])
-            .range(['#ffffff','#fff1a1','#ffe075','#ffcb55','#ffb73c','#ffa127','#ff8815','#ff6d05','#ff4b00','#ff0000']);
+            .domain([0, 35, 70, 105, 140, 175, 210, 245, 280, 315, 350])
+            .range(['#DBDBDB','#FEFFEB','#ffedca','#ffd9b3','#ffc69c','#ffb186','#ff9d70','#ff8659','#ff6b40','#ff4a26','#ff0000']);
 
         // Update the projection    
         projection
@@ -92,7 +137,15 @@ export default class DataMap extends React.Component {
                     .selectAll("path")
                     .data(geoJsonObj.features)
                     .enter().append("path")            
-                    .attr("fill", function(d) { return colorScale(amountCrimePerBeat[d["properties"]["beat_num"]]); })
+                    .attr("fill", function(d) {
+                        var noDataColor = "#DBDBDB";
+                        var color = colorScale(amountCrimePerBeat[d["properties"]["beat_num"]]);
+                        if (!color) {
+                            return noDataColor;
+                        } else {
+                            return color;
+                        }
+                    })
                     .attr("d", path)
                     .attr("id", function(d, i) { return geoJsonObj.features[i].properties.beat_num; });
 
@@ -100,6 +153,7 @@ export default class DataMap extends React.Component {
 
     selectData(crimeKey){
 
+        this.setState({"crimes": crimeKey}); 
 
     }
 
