@@ -3,6 +3,7 @@ import React from 'react';
 
 // Third party packages
 import * as d3 from "d3";
+import * as chroma from 'chroma-js';
 
 import domestic_battery_simple from '../data/crimes_dom_beat.json';
 import murders from '../data/crimes_murder_beat.json';
@@ -17,8 +18,7 @@ export default class DataMap extends React.Component {
         this.state = {
             crimes: "domestic_battery_simple",
             width: 800,
-            height: 800,
-            viewingData: []
+            height: 800
         };
         this.crimesTypeListing = {
             "domestic_battery_simple": {
@@ -28,33 +28,29 @@ export default class DataMap extends React.Component {
                 "name": "Murder", "data": murders
             }
         };
-        this.state.viewingData = this.crimesTypeListing[this.state.crimes].data;
+        this.viewingData = this.crimesTypeListing[this.state.crimes].data;
 
-        for (var counter = 0; counter < this.state.viewingData.length; counter++) {
-            var beatNum = this.state.viewingData[counter]["beat_num"];
+        for (var counter = 0; counter < this.viewingData.length; counter++) {
+            var beatNum = this.viewingData[counter]["beat_num"];
             if (beatNum < 1000) {
-              this.state.viewingData[counter]["beat_num"] = "0" + this.state.viewingData[counter]["beat_num"];
+              this.viewingData[counter]["beat_num"] = "0" + this.viewingData[counter]["beat_num"];
             } else {
-              this.state.viewingData[counter]["beat_num"] = "" + this.state.viewingData[counter]["beat_num"] + "";
+              this.viewingData[counter]["beat_num"] = "" + this.viewingData[counter]["beat_num"] + "";
             }
         }
 
         var amountCrimePerBeat = {};
 
-        this.state.viewingData.forEach(function(d) { 
+        this.viewingData.forEach(function(d) { 
           amountCrimePerBeat[d["beat_num"]] = d["crimes"];
         });
 
-        this.state.amountCrimePerBeat = amountCrimePerBeat;
+        this.amountCrimePerBeat = amountCrimePerBeat;
 
         console.log("Component constructed");
     }
 
     componentDidUpdate() {
-
-        console.log(this.state);
-
-        console.log("Component updated");
 
         var viewingData = this.crimesTypeListing[this.state.crimes].data;
 
@@ -73,19 +69,34 @@ export default class DataMap extends React.Component {
           amountCrimePerBeat[d["beat_num"]] = d["crimes"];
         });
 
-        this.state.amountCrimePerBeat = amountCrimePerBeat;
+        this.amountCrimePerBeat = amountCrimePerBeat;
 
-        // Get data bounds
-        var max = amountCrimePerBeat.reduce((prev, current) => (prev.crimes > current.crimes) ? prev : current);
-        console.log(max);
+        // Get list of crime numbers
+        var crimeNumbers = Object.keys(amountCrimePerBeat).map(function(key) {
+           return amountCrimePerBeat[key];
+        });
+
+        var max = Math.max(...crimeNumbers);
+        var min = Math.min(...crimeNumbers);
+
+        // Create range
+        var steps = (max - min) / 10;
+
+        var domain = [0];
+
+        for (counter = 0; counter <= max; counter++){
+            domain.push(Math.ceil(min + (steps * counter)));
+        }
+
+        // var test = chroma.scale(['lightyellow', 'red']).domain([min, max], ( domain.length + 1) );
+
+        // console.log(test);
 
         var colorScale = d3.scaleThreshold()
-            .domain([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-            .range(['#DBDBDB','#ffffff','#fff1a1','#ffe075','#ffcb55','#ffb73c','#ffa127','#ff8815','#ff6d05','#ff4b00','#ff0000']);
+            .domain([0,1,2,3,4,5,6,7,8,9])
+            .range(['#ffffe0','#ffeecc','#ffdeb8','#ffcba3','#ffba8f','#ffa77a','#ff9467','#ff7e51','#ff663c','#ff4723','#ff0000']);
 
         this.svg = d3.select("#mapArea svg");
-
-        var amountCrimePerBeat = this.state.amountCrimePerBeat;
 
         this.svg.selectAll("path")          
                     .attr("fill", function(d) { 
@@ -98,11 +109,11 @@ export default class DataMap extends React.Component {
                         }
                     });
 
+        console.log("Component updated");
+
     }
 
     componentDidMount(){
-
-        console.log("Component mounted");
 
         // Get geographic data
         var geoJsonObj = beats;
@@ -121,8 +132,8 @@ export default class DataMap extends React.Component {
                         t = [(this.state.width - s * (b[1][0] + b[0][0])) / 2, (this.state.height - s * (b[1][1] + b[0][1])) / 2];
 
         var colorScale = d3.scaleThreshold()
-            .domain([0, 35, 70, 105, 140, 175, 210, 245, 280, 315, 350])
-            .range(['#DBDBDB','#FEFFEB','#ffedca','#ffd9b3','#ffc69c','#ffb186','#ff9d70','#ff8659','#ff6b40','#ff4a26','#ff0000']);
+            .domain([35, 70, 105, 140, 175, 210, 245, 280, 315, 350])
+            .range(['#ffffe0','#ffeecc','#ffdeb8','#ffcba3','#ffba8f','#ffa77a','#ff9467','#ff7e51','#ff663c','#ff4723','#ff0000']);
 
         // Update the projection    
         projection
@@ -131,7 +142,7 @@ export default class DataMap extends React.Component {
 
         this.svg = d3.select("#mapArea svg");
 
-        var amountCrimePerBeat = this.state.amountCrimePerBeat;
+        var amountCrimePerBeat = this.amountCrimePerBeat;
 
         this.svg.append("g")
                     .selectAll("path")
@@ -149,11 +160,15 @@ export default class DataMap extends React.Component {
                     .attr("d", path)
                     .attr("id", function(d, i) { return geoJsonObj.features[i].properties.beat_num; });
 
+        console.log("Component mounted");
+
     }
 
     selectData(crimeKey){
 
-        this.setState({"crimes": crimeKey}); 
+        if (crimeKey !== this.state.crimes) {
+            this.setState({"crimes": crimeKey});
+        }
 
     }
 
