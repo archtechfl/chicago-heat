@@ -7,8 +7,31 @@
 
 	path {
 	    stroke: black;
-	    &:hover {
+	    opacity: 0.8;
+	    &:hover, &.active {
 	    	stroke-width: 2px;
+	    	opacity: 1;
 	    }
+	}
+	.mapWrapper {
+		position: relative;
+	}
+	.data-display {
+		display: block;
+	    position: absolute;
+	    top: 100px;
+	    left: 700px;
+	}
+	.legend {
+		ul {
+			list-style-type: none;
+			li {
+				width: 20px;
+				height: 20px;
+				margin-bottom: 5px;
+				border: 1px solid gray;
+				opacity: 0.8;
+			}
+		}
 	}
 }

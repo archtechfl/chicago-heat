@@ -6,7 +6,11 @@ import * as d3 from "d3";
 import * as chroma from 'chroma-js/chroma.js';
 
 import domestic_battery_simple from '../data/crimes_dom_beat.json';
-import murders from '../data/crimes_murder_beat.json';
+import murder from '../data/crimes_murder_beat.json';
+import theft_under_500 from '../data/theft_500_under.json';
+import rob_gun from '../data/rob_gun_stats.json';
+
+import Legend from './legend.jsx';
 
 // Data
 import beats from '../data/chicago_beats.geo.json';
@@ -18,19 +22,29 @@ export default class DataMap extends React.Component {
         this.state = {
             crimes: "domestic_battery_simple",
             width: 800,
-            height: 800
+            height: 800,
+            crimeCount: 0,
+            crimeBeat: ""
         };
         this.crimesTypeListing = {
             "domestic_battery_simple": {
                 "name": "Domestic Battery Simple", "data": domestic_battery_simple
             },
             "murder": {
-                "name": "Murder", "data": murders
+                "name": "Murder", "data": murder
+            },
+            "theft_under_500": {
+                "name": "Theft under $500", "data": theft_under_500
+            },
+            "rob_gun": {
+                "name": "Armed Robbery: Handgun", "data": rob_gun
             }
         };
         this.viewingData = this.crimesTypeListing[this.state.crimes].data;
 
-        this.amountCrimePerBeat = this.getCrimesKeyedToDivisions(this.viewingData);
+        this.amountCrimePerBeat = this.getCrimesKeyedToDivisions(this.viewingData); 
+
+        this.currentRange = [];
 
         console.log("Component constructed");
     }
@@ -85,10 +99,6 @@ export default class DataMap extends React.Component {
 
         // Create SVG
         this.generateSVG(true, geoJsonObj, colorScale, amountCrimePerBeat);
-
-        // $('#mapArea svg path').on("click", function(event){
-        //     var value = $(event.target).data("value");
-        // });
 
         console.log("Component mounted");
 
@@ -168,9 +178,9 @@ export default class DataMap extends React.Component {
         // to purple
         var steps = (max - min) / 10;
 
-        var domain = [0];
+        var domain = [min + (steps * 1)];
 
-        for (var counter = 1; counter < 10; counter++){
+        for (var counter = 2; counter < 10; counter++){
             var currentVal = Math.ceil(min + (steps * counter));
             if (currentVal !== domain[counter - 1]) {
                 domain.push(Math.ceil(min + (steps * counter))); 
@@ -178,6 +188,8 @@ export default class DataMap extends React.Component {
         };
 
         var colorRange = chroma.scale(['lightyellow', 'red', 'purple']).colors(domain.length + 1);
+
+        this.currentRange = colorRange;
 
         var colorScale = d3.scaleThreshold()
             .domain([...domain])
@@ -199,6 +211,16 @@ export default class DataMap extends React.Component {
         }
     }
 
+    clickOnBeat(event) {
+        // Change the data display to the current selected area
+        if (event.target.id) {
+            $("#mapArea svg path").removeClass("active");
+            $(event.target).addClass("active");
+            this.setState({"crimeCount": event.target.dataset.value});
+            this.setState({"crimeBeat": event.target.id});
+        }
+    }
+
     render(){
         return (
             <div className="map">
@@ -211,8 +233,18 @@ export default class DataMap extends React.Component {
                     }
                     </ul>
                 </div>
-                <div id="mapArea">
-                    <svg width={ this.state.width } height={ this.state.height }></svg>
+                <div className="mapWrapper">
+                    <h3 className="current-crime">{this.crimesTypeListing[this.state.crimes].name}</h3>
+                    <div id="mapArea">
+                        <svg width={ this.state.width } height={ this.state.height } onClick={this.clickOnBeat.bind(this)}></svg>
+                    </div>
+                    <div className="data-display">
+                        <div>{`Beat: ${this.state.crimeBeat}`}</div>
+                        <div>{`Crimes: ${this.state.crimeCount}`}</div>
+                        {
+                            // <Legend data={this.currentRange}/>
+                        }
+                    </div>
                 </div>
             </div>
         );
