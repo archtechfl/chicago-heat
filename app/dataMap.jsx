@@ -3,7 +3,7 @@ import React from 'react';
 
 // Third party packages
 import * as d3 from "d3";
-import * as chroma from 'chroma-js';
+import * as chroma from 'chroma-js/chroma.js';
 
 import domestic_battery_simple from '../data/crimes_dom_beat.json';
 import murders from '../data/crimes_murder_beat.json';
@@ -30,84 +30,40 @@ export default class DataMap extends React.Component {
         };
         this.viewingData = this.crimesTypeListing[this.state.crimes].data;
 
-        for (var counter = 0; counter < this.viewingData.length; counter++) {
-            var beatNum = this.viewingData[counter]["beat_num"];
-            if (beatNum < 1000) {
-              this.viewingData[counter]["beat_num"] = "0" + this.viewingData[counter]["beat_num"];
-            } else {
-              this.viewingData[counter]["beat_num"] = "" + this.viewingData[counter]["beat_num"] + "";
-            }
-        }
+        this.amountCrimePerBeat = this.getCrimesKeyedToDivisions(this.viewingData);
 
+        console.log("Component constructed");
+    }
+
+    getCrimesKeyedToDivisions(data) {
+        // Convert the array of crime statistic objects to a single object with crimes keyed
+        // to their associated police beat ID
         var amountCrimePerBeat = {};
 
-        this.viewingData.forEach(function(d) { 
+        data.forEach(function(d) { 
           amountCrimePerBeat[d["beat_num"]] = d["crimes"];
         });
 
-        this.amountCrimePerBeat = amountCrimePerBeat;
+        return amountCrimePerBeat;
 
-        console.log("Component constructed");
     }
 
     componentDidUpdate() {
 
         var viewingData = this.crimesTypeListing[this.state.crimes].data;
 
-        for (var counter = 0; counter < viewingData.length; counter++) {
-            var beatNum = viewingData[counter]["beat_num"];
-            if (beatNum < 1000) {
-              viewingData[counter]["beat_num"] = "0" + viewingData[counter]["beat_num"];
-            } else {
-              viewingData[counter]["beat_num"] = "" + viewingData[counter]["beat_num"] + "";
-            }
-        }
+        var amountCrimePerBeat = this.getCrimesKeyedToDivisions(viewingData);
 
-        var amountCrimePerBeat = {};
+        var crimeBounds = this.getDataBounds(amountCrimePerBeat);
 
-        viewingData.forEach(function(d) { 
-          amountCrimePerBeat[d["beat_num"]] = d["crimes"];
-        });
+        var max = crimeBounds["max"];
+        var min = crimeBounds["min"];
 
-        this.amountCrimePerBeat = amountCrimePerBeat;
+        var colorScale = this.getColorScale(min, max);
 
-        // Get list of crime numbers
-        var crimeNumbers = Object.keys(amountCrimePerBeat).map(function(key) {
-           return amountCrimePerBeat[key];
-        });
+        // Update SVG
 
-        var max = Math.max(...crimeNumbers);
-        var min = Math.min(...crimeNumbers);
-
-        // Create range
-        var steps = (max - min) / 10;
-
-        var domain = [0];
-
-        for (counter = 0; counter <= max; counter++){
-            domain.push(Math.ceil(min + (steps * counter)));
-        }
-
-        // var test = chroma.scale(['lightyellow', 'red']).domain([min, max], ( domain.length + 1) );
-
-        // console.log(test);
-
-        var colorScale = d3.scaleThreshold()
-            .domain([0,1,2,3,4,5,6,7,8,9])
-            .range(['#ffffe0','#ffeecc','#ffdeb8','#ffcba3','#ffba8f','#ffa77a','#ff9467','#ff7e51','#ff663c','#ff4723','#ff0000']);
-
-        this.svg = d3.select("#mapArea svg");
-
-        this.svg.selectAll("path")          
-                    .attr("fill", function(d) { 
-                        var noDataColor = "#DBDBDB";
-                        var color = colorScale(amountCrimePerBeat[d["properties"]["beat_num"]]);
-                        if (!color) {
-                            return noDataColor;
-                        } else {
-                            return color;
-                        }
-                    });
+        this.generateSVG(false, null, colorScale, amountCrimePerBeat);
 
         console.log("Component updated");
 
@@ -118,47 +74,21 @@ export default class DataMap extends React.Component {
         // Get geographic data
         var geoJsonObj = beats;
 
-        //Define map projection
-        var projection = d3.geoMercator()
-                               .translate([0, 0])
-                               .scale(1);
-
-        //Define path generator
-        var path = d3.geoPath()
-                         .projection(projection);
-
-        var b = path.bounds( geoJsonObj ),
-                        s = .95 / Math.max((b[1][0] - b[0][0]) / this.state.width, (b[1][1] - b[0][1]) / this.state.height),
-                        t = [(this.state.width - s * (b[1][0] + b[0][0])) / 2, (this.state.height - s * (b[1][1] + b[0][1])) / 2];
-
-        var colorScale = d3.scaleThreshold()
-            .domain([35, 70, 105, 140, 175, 210, 245, 280, 315, 350])
-            .range(['#ffffe0','#ffeecc','#ffdeb8','#ffcba3','#ffba8f','#ffa77a','#ff9467','#ff7e51','#ff663c','#ff4723','#ff0000']);
-
-        // Update the projection    
-        projection
-          .scale(s)
-          .translate(t);
-
-        this.svg = d3.select("#mapArea svg");
-
         var amountCrimePerBeat = this.amountCrimePerBeat;
 
-        this.svg.append("g")
-                    .selectAll("path")
-                    .data(geoJsonObj.features)
-                    .enter().append("path")            
-                    .attr("fill", function(d) {
-                        var noDataColor = "#DBDBDB";
-                        var color = colorScale(amountCrimePerBeat[d["properties"]["beat_num"]]);
-                        if (!color) {
-                            return noDataColor;
-                        } else {
-                            return color;
-                        }
-                    })
-                    .attr("d", path)
-                    .attr("id", function(d, i) { return geoJsonObj.features[i].properties.beat_num; });
+        var crimeBounds = this.getDataBounds(amountCrimePerBeat);
+
+        var max = crimeBounds["max"];
+        var min = crimeBounds["min"];
+
+        var colorScale = this.getColorScale(min, max);
+
+        // Create SVG
+        this.generateSVG(true, geoJsonObj, colorScale, amountCrimePerBeat);
+
+        // $('#mapArea svg path').on("click", function(event){
+        //     var value = $(event.target).data("value");
+        // });
 
         console.log("Component mounted");
 
@@ -166,10 +96,107 @@ export default class DataMap extends React.Component {
 
     selectData(crimeKey){
 
+        // Called when data set is toggled, triggers re-rendering process
+
         if (crimeKey !== this.state.crimes) {
             this.setState({"crimes": crimeKey});
         }
 
+    }
+
+    generateSVG(initial, geoData, colorScale, crimeData) {
+        // Visualize the data
+        // During initial setup, the SVG must be drawn and the geographic divisions supplied with data
+        // When switching to another data set, only the path colors and associated metadata needs to be updated,
+        // no need to redraw the SVG again
+
+        this.svg = d3.select("#mapArea svg");
+
+        if (initial) {
+
+            //Define map projection
+            var projection = d3.geoMercator()
+                                   .translate([0, 0])
+                                   .scale(1);
+
+            //Define path generator
+            var path = d3.geoPath()
+                             .projection(projection);
+
+            var b = path.bounds( geoData ),
+                            s = .95 / Math.max((b[1][0] - b[0][0]) / this.state.width, (b[1][1] - b[0][1]) / this.state.height),
+                            t = [(this.state.width - s * (b[1][0] + b[0][0])) / 2, (this.state.height - s * (b[1][1] + b[0][1])) / 2];
+
+            // Update the projection to center the rendered city map in the SVG
+            projection
+              .scale(s)
+              .translate(t);
+
+            this.svg.append("g")
+                        .selectAll("path")
+                        .data(geoData.features)
+                        .enter().append("path")            
+                        .attr("fill", function(d) {
+                            let noDataColor = "#DBDBDB";
+                            let color = colorScale(crimeData[d["properties"]["beat_num"]]);
+                            if (!color) {
+                                return noDataColor;
+                            } else {
+                                return color;
+                            }
+                        })
+                        .attr("d", path)
+                        .attr("id", function(d, i) { return geoData.features[i].properties.beat_num; })
+                        .attr("data-value", function(d, i) { return crimeData[d["properties"]["beat_num"]]; });
+        } else {
+            this.svg.selectAll("path")          
+                    .attr("fill", function(d) { 
+                        let noDataColor = "#DBDBDB";
+                        let color = colorScale(crimeData[d["properties"]["beat_num"]]);
+                        if (!color) {
+                            return noDataColor;
+                        } else {
+                            return color;
+                        }
+                    })
+                    .attr("data-value", function(d, i) { return crimeData[d["properties"]["beat_num"]]; });
+        }
+    }
+
+    getColorScale(min, max){
+        // Retrieve a color scale based on the number of thresholds in the dataset, ranging from lightyellow
+        // to purple
+        var steps = (max - min) / 10;
+
+        var domain = [0];
+
+        for (var counter = 1; counter < 10; counter++){
+            var currentVal = Math.ceil(min + (steps * counter));
+            if (currentVal !== domain[counter - 1]) {
+                domain.push(Math.ceil(min + (steps * counter))); 
+            }
+        };
+
+        var colorRange = chroma.scale(['lightyellow', 'red', 'purple']).colors(domain.length + 1);
+
+        var colorScale = d3.scaleThreshold()
+            .domain([...domain])
+            .range([...colorRange]);
+
+        return colorScale;
+    }
+
+    getDataBounds(crimesPerBeat) {
+        // Get the min and max crime counts in the data sets
+        var crimeNumbers = Object.keys(crimesPerBeat).map(function(key) {
+           return crimesPerBeat[key];
+        });
+        let max = Math.max(...crimeNumbers);
+        let min = Math.min(...crimeNumbers);
+        return {
+            "min": min,
+            "max": max
+        }
     }
 
     render(){
