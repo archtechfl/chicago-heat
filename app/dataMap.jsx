@@ -5,11 +5,15 @@ import React from 'react';
 import * as d3 from "d3";
 import * as chroma from 'chroma-js/chroma.js';
 
+// Crimes
 import domestic_battery_simple from '../data/crimes_dom_beat.json';
 import murder from '../data/crimes_murder_beat.json';
 import theft_under_500 from '../data/theft_500_under.json';
 import rob_gun from '../data/rob_gun_stats.json';
 
+import { primary_types } from '../data/primary_types';
+
+// Legend
 import Legend from './legend.jsx';
 
 // Data
@@ -19,12 +23,15 @@ export default class DataMap extends React.Component {
 
     constructor(props){
         super(props);
+
         this.state = {
-            crimes: "domestic_battery_simple",
+            crimes: "",
             width: 800,
             height: 800,
             crimeCount: 0,
-            crimeBeat: ""
+            crimeBeat: "",
+            currentRange: [],
+            domain: []
         };
         this.crimesTypeListing = {
             "domestic_battery_simple": {
@@ -39,14 +46,9 @@ export default class DataMap extends React.Component {
             "rob_gun": {
                 "name": "Armed Robbery: Handgun", "data": rob_gun
             }
-        };
-        this.viewingData = this.crimesTypeListing[this.state.crimes].data;
+        }; 
 
-        this.amountCrimePerBeat = this.getCrimesKeyedToDivisions(this.viewingData); 
-
-        this.currentRange = [];
-
-        console.log("Component constructed");
+        // console.log("Component constructed");
     }
 
     getCrimesKeyedToDivisions(data) {
@@ -64,22 +66,11 @@ export default class DataMap extends React.Component {
 
     componentDidUpdate() {
 
-        var viewingData = this.crimesTypeListing[this.state.crimes].data;
-
-        var amountCrimePerBeat = this.getCrimesKeyedToDivisions(viewingData);
-
-        var crimeBounds = this.getDataBounds(amountCrimePerBeat);
-
-        var max = crimeBounds["max"];
-        var min = crimeBounds["min"];
-
-        var colorScale = this.getColorScale(min, max);
-
         // Update SVG
 
-        this.generateSVG(false, null, colorScale, amountCrimePerBeat);
+        this.generateSVG(false, null, this.state.colorScale, this.state.amountCrimePerBeat);
 
-        console.log("Component updated");
+        // console.log("Component updated");
 
     }
 
@@ -88,19 +79,11 @@ export default class DataMap extends React.Component {
         // Get geographic data
         var geoJsonObj = beats;
 
-        var amountCrimePerBeat = this.amountCrimePerBeat;
+        var colorScale = this.getColorScale(0, 0);
 
-        var crimeBounds = this.getDataBounds(amountCrimePerBeat);
+        this.generateSVG(true, geoJsonObj, colorScale["colorScale"], {});
 
-        var max = crimeBounds["max"];
-        var min = crimeBounds["min"];
-
-        var colorScale = this.getColorScale(min, max);
-
-        // Create SVG
-        this.generateSVG(true, geoJsonObj, colorScale, amountCrimePerBeat);
-
-        console.log("Component mounted");
+        // console.log("Component mounted");
 
     }
 
@@ -109,7 +92,28 @@ export default class DataMap extends React.Component {
         // Called when data set is toggled, triggers re-rendering process
 
         if (crimeKey !== this.state.crimes) {
-            this.setState({"crimes": crimeKey});
+
+            console.log(crimeKey);
+
+            var viewingData = this.crimesTypeListing[crimeKey].data;
+
+            var amountCrimePerBeat = this.getCrimesKeyedToDivisions(viewingData);
+
+            var crimeBounds = this.getDataBounds(amountCrimePerBeat);
+
+            var max = crimeBounds["max"];
+            var min = crimeBounds["min"];
+
+            var colorScale = this.getColorScale(min, max);
+
+            this.setState({
+                "crimes": crimeKey,
+                "currentRange": colorScale.currentRange,
+                "domain": colorScale.domain,
+                "colorScale": colorScale.colorScale,
+                "amountCrimePerBeat": amountCrimePerBeat
+            });
+
         }
 
     }
@@ -178,24 +182,28 @@ export default class DataMap extends React.Component {
         // to purple
         var steps = (max - min) / 10;
 
-        var domain = [min + (steps * 1)];
+        var domain = [Math.ceil(min + (steps * 1))];
 
-        for (var counter = 2; counter < 10; counter++){
-            var currentVal = Math.ceil(min + (steps * counter));
-            if (currentVal !== domain[counter - 1]) {
-                domain.push(Math.ceil(min + (steps * counter))); 
+        for (var counter = 1; counter < 10; counter++){
+            var currentVal = Math.ceil(min + (steps * (counter + 1)));
+            // Current domain length
+            var lastIndex = domain.length - 1;
+            if (currentVal !== domain[lastIndex]) {
+                domain.push(currentVal); 
             }
         };
 
-        var colorRange = chroma.scale(['lightyellow', 'red', 'purple']).colors(domain.length + 1);
-
-        this.currentRange = colorRange;
+        var colorRange = chroma.scale(['lightyellow', 'orange', 'red', 'purple']).colors(domain.length + 1);
 
         var colorScale = d3.scaleThreshold()
             .domain([...domain])
             .range([...colorRange]);
 
-        return colorScale;
+        return {
+            "colorScale": colorScale,
+            "domain": domain,
+            "currentRange": colorRange
+        };
     }
 
     getDataBounds(crimesPerBeat) {
@@ -234,7 +242,7 @@ export default class DataMap extends React.Component {
                     </ul>
                 </div>
                 <div className="mapWrapper">
-                    <h3 className="current-crime">{this.crimesTypeListing[this.state.crimes].name}</h3>
+                    <h3 className="current-crime">{this.state.crimes ? this.crimesTypeListing[this.state.crimes].name : "None selected"}</h3>
                     <div id="mapArea">
                         <svg width={ this.state.width } height={ this.state.height } onClick={this.clickOnBeat.bind(this)}></svg>
                     </div>
@@ -242,7 +250,7 @@ export default class DataMap extends React.Component {
                         <div>{`Beat: ${this.state.crimeBeat}`}</div>
                         <div>{`Crimes: ${this.state.crimeCount}`}</div>
                         {
-                            // <Legend data={this.currentRange}/>
+                            <Legend data={this.state.crimes ? this.state.currentRange : []} domain={this.state.crimes ? this.state.domain : []}/>
                         }
                     </div>
                 </div>

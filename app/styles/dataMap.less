@@ -20,17 +20,30 @@
 		display: block;
 	    position: absolute;
 	    top: 100px;
-	    left: 700px;
+	    left: 750px;
 	}
 	.legend {
 		ul {
 			list-style-type: none;
+			margin: 0;
+			padding: 0;
 			li {
-				width: 20px;
-				height: 20px;
-				margin-bottom: 5px;
-				border: 1px solid gray;
-				opacity: 0.8;
+				span {
+					display: inline-block;
+					margin-bottom: 5px;
+					line-height: 24px;
+				}
+				span.colorBox {
+					width: 20px;
+					height: 20px;
+					border: 1px solid gray;
+					opacity: 0.8;
+				}
+				span.colorLabel {
+					position: relative;
+					top: -10px;
+					margin-left: 5px;
+				}
 			}
 		}
 	}
