@@ -249,6 +249,7 @@ export default class DataMap extends React.Component {
         return (
             <div className="map">
                 <div id="dataBrowser">
+                    <h3>Primary types</h3>
                     <ul>
                     {
                         Object.keys(this.crimesTypeListing).map((crime_name,i) =>
