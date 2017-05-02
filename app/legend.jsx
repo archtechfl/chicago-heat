@@ -29,6 +29,7 @@ export default class Legend extends React.Component {
     calculateLegend(nextProps){
         // Determine the legend display
         var domain = nextProps.domain;
+
         var legend = [];
         // Determine start range
         if (domain[0] > 2) {
@@ -46,6 +47,7 @@ export default class Legend extends React.Component {
         )
         // Complete rest of range
         this.legend = legend;
+
     }
 
     render(){

@@ -36,7 +36,7 @@ export default class DataMap extends React.Component {
         };
         this.crimesTypeListing = primary_types;
 
-        // console.log("Component constructed");
+        console.log("Component constructed");
     }
 
     getCrimesKeyedToDivisions(data) {
@@ -58,7 +58,7 @@ export default class DataMap extends React.Component {
 
         this.generateSVG(false, null, this.state.colorScale, this.state.amountCrimePerBeat);
 
-        // console.log("Component updated");
+        console.log("Component updated");
 
     }
 
@@ -71,7 +71,7 @@ export default class DataMap extends React.Component {
 
         this.generateSVG(true, geoJsonObj, colorScale["colorScale"], {});
 
-        // console.log("Component mounted");
+        console.log("Component mounted");
 
     }
 
@@ -205,7 +205,20 @@ export default class DataMap extends React.Component {
             }
         };
 
-        var colorRange = chroma.scale(['lightyellow', 'orange', 'red', 'purple']).colors(domain.length + 1);
+        let domain_length = 0;
+        var colorRange = [];
+
+        // Length to send
+        // If there is only one data point, only need to send one color
+        // chroma.scale returns single color as string so need to maintain as array
+        if (domain.length < 2) {
+            domain_length = 1;
+            colorRange = chroma.scale(['lightyellow', 'lightyellow']).colors(domain_length);
+            colorRange = [colorRange];
+        } else {
+            domain_length = domain.length + 1;
+            colorRange = chroma.scale(['lightyellow', 'orange', 'red', 'purple']).colors(domain_length);
+        }
 
         var colorScale = d3.scaleThreshold()
             .domain([...domain])
