@@ -31,7 +31,8 @@ export default class DataMap extends React.Component {
             crimeCount: 0,
             crimeBeat: "",
             currentRange: [],
-            domain: []
+            domain: [],
+            amountCrimePerBeat: {}
         };
         this.crimesTypeListing = primary_types;
 
@@ -80,6 +81,8 @@ export default class DataMap extends React.Component {
 
         if (crimeKey !== this.state.crimes) {
 
+            $("#mapArea svg path").removeClass("active");
+
             var endpoint = `../data/${this.crimesTypeListing[crimeKey]["file_name"]}`;
 
             fetch(endpoint)
@@ -106,7 +109,9 @@ export default class DataMap extends React.Component {
             "currentRange": colorScale.currentRange,
             "domain": colorScale.domain,
             "colorScale": colorScale.colorScale,
-            "amountCrimePerBeat": amountCrimePerBeat
+            "amountCrimePerBeat": amountCrimePerBeat,
+            "crimeCount": 0,
+            "crimeBeat": ""
         });
     }
 
@@ -144,28 +149,43 @@ export default class DataMap extends React.Component {
                         .enter().append("path")            
                         .attr("fill", function(d) {
                             let noDataColor = "#DBDBDB";
-                            let color = colorScale(crimeData[d["properties"]["beat_num"]]);
-                            if (!color) {
+                            let colorData = crimeData[d["properties"]["beat_num"]];
+                            if (!colorData) {
                                 return noDataColor;
                             } else {
-                                return color;
+                                return colorScale(colorData);
                             }
                         })
                         .attr("d", path)
                         .attr("id", function(d, i) { return geoData.features[i].properties.beat_num; })
-                        .attr("data-value", function(d, i) { return crimeData[d["properties"]["beat_num"]]; });
+                        .attr("data-value", function(d, i) {
+                            var value = crimeData[d["properties"]["beat_num"]];
+                            if (value) {
+                                return value;
+                            } else {
+                                return 0;
+                            }
+                        });
         } else {
+
             this.svg.selectAll("path")          
                     .attr("fill", function(d) { 
                         let noDataColor = "#DBDBDB";
-                        let color = colorScale(crimeData[d["properties"]["beat_num"]]);
-                        if (!color) {
+                        let colorData = crimeData[d["properties"]["beat_num"]];
+                        if (!colorData) {
                             return noDataColor;
                         } else {
-                            return color;
+                            return colorScale(colorData);
                         }
                     })
-                    .attr("data-value", function(d, i) { return crimeData[d["properties"]["beat_num"]]; });
+                    .attr("data-value", function(d, i) { 
+                        var value = crimeData[d["properties"]["beat_num"]];
+                        if (value) {
+                            return value;
+                        } else {
+                            return 0;
+                        }
+                    });
         }
     }
 
@@ -216,8 +236,12 @@ export default class DataMap extends React.Component {
         if (event.target.id) {
             $("#mapArea svg path").removeClass("active");
             $(event.target).addClass("active");
-            this.setState({"crimeCount": event.target.dataset.value});
-            this.setState({"crimeBeat": event.target.id});
+            if (event.target.dataset.value){
+                this.setState({
+                    "crimeCount": event.target.dataset.value,
+                    "crimeBeat": event.target.id
+                });
+            }
         }
     }
 
@@ -228,7 +252,7 @@ export default class DataMap extends React.Component {
                     <ul>
                     {
                         Object.keys(this.crimesTypeListing).map((crime_name,i) =>
-                            <li key={i} onClick={this.selectData.bind(this, crime_name)}>{this.crimesTypeListing[crime_name].name}</li>
+                            <li className={crime_name == this.state.crimes ? "active" : ""} key={i} onClick={this.selectData.bind(this, crime_name)}>{this.crimesTypeListing[crime_name].name}</li>
                         )
                     }
                     </ul>
