@@ -2,7 +2,7 @@
 
 .map {
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
 	padding: 1% 5%;
 
 	path {
@@ -15,6 +15,9 @@
 	}
 	.mapWrapper {
 		position: relative;
+	}
+	#mapArea {
+		width: 900px;
 	}
 	.data-display {
 		display: block;
@@ -44,6 +47,17 @@
 					top: -10px;
 					margin-left: 5px;
 				}
+			}
+		}
+	}
+	// Data browser
+	#dataBrowser {
+		ul {
+			list-style-type: none;
+			margin: 0;
+			padding: 0;
+			li {
+				cursor: pointer;
 			}
 		}
 	}

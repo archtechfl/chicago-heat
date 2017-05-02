@@ -33,20 +33,7 @@ export default class DataMap extends React.Component {
             currentRange: [],
             domain: []
         };
-        this.crimesTypeListing = {
-            "domestic_battery_simple": {
-                "name": "Domestic Battery Simple", "data": domestic_battery_simple
-            },
-            "murder": {
-                "name": "Murder", "data": murder
-            },
-            "theft_under_500": {
-                "name": "Theft under $500", "data": theft_under_500
-            },
-            "rob_gun": {
-                "name": "Armed Robbery: Handgun", "data": rob_gun
-            }
-        }; 
+        this.crimesTypeListing = primary_types;
 
         // console.log("Component constructed");
     }
@@ -93,29 +80,34 @@ export default class DataMap extends React.Component {
 
         if (crimeKey !== this.state.crimes) {
 
-            console.log(crimeKey);
+            var endpoint = `../data/${this.crimesTypeListing[crimeKey]["file_name"]}`;
 
-            var viewingData = this.crimesTypeListing[crimeKey].data;
-
-            var amountCrimePerBeat = this.getCrimesKeyedToDivisions(viewingData);
-
-            var crimeBounds = this.getDataBounds(amountCrimePerBeat);
-
-            var max = crimeBounds["max"];
-            var min = crimeBounds["min"];
-
-            var colorScale = this.getColorScale(min, max);
-
-            this.setState({
-                "crimes": crimeKey,
-                "currentRange": colorScale.currentRange,
-                "domain": colorScale.domain,
-                "colorScale": colorScale.colorScale,
-                "amountCrimePerBeat": amountCrimePerBeat
-            });
+            fetch(endpoint)
+              .then(blob => blob.json())
+              .then(data => this.prepareForUpdate(data, crimeKey));
 
         }
 
+    }
+
+    prepareForUpdate(viewingData, crimeKey){
+
+        var amountCrimePerBeat = this.getCrimesKeyedToDivisions(viewingData);
+
+        var crimeBounds = this.getDataBounds(amountCrimePerBeat);
+
+        var max = crimeBounds["max"];
+        var min = crimeBounds["min"];
+
+        var colorScale = this.getColorScale(min, max);
+
+        this.setState({
+            "crimes": crimeKey,
+            "currentRange": colorScale.currentRange,
+            "domain": colorScale.domain,
+            "colorScale": colorScale.colorScale,
+            "amountCrimePerBeat": amountCrimePerBeat
+        });
     }
 
     generateSVG(initial, geoData, colorScale, crimeData) {
