@@ -289,7 +289,7 @@ export default class DataMap extends React.Component {
             let leftPosition = positionBeat.left - positionMap.left - ( 60 - (beatDimensions["width"] / 2));
             let tooltip = {
                 "left": leftPosition,
-                "top": (positionBeat.top - positionMap.top) - 60
+                "top": (positionBeat.top - positionMap.top) - 55
             }
             // Update state for side display
             if (event.target.dataset.value){
@@ -330,8 +330,8 @@ export default class DataMap extends React.Component {
                 </div>
                 <div className="mapWrapper">
                     <div className="tooltip" style={{'left': this.state.positionTooltip.left, 'top': this.state.positionTooltip.top, "visibility": this.state.tooltipActive ? "visible" : "hidden"}}>
-                        <div>{`Beat: ${this.state.crimeBeat}`}</div>
-                        <div>{`Crimes: ${this.state.crimeCount}`}</div>
+                        <div><span className="tooltip-label">Beat: </span><span className="tooltip-data">{this.state.crimeBeat}</span></div>
+                        <div><span className="tooltip-label">Crimes: </span><span className="tooltip-data">{this.state.crimeCount}</span></div>
                     </div>
                     <h3 className="current-crime">{this.state.crimes ? this.crimesTypeListing[this.state.crimes].name : "None selected"}</h3>
                     <div id="mapArea">
