@@ -7,7 +7,7 @@ module.exports = {
     './app/styles/app.less',
   ],
   output: {
-    filename: 'bundle.js',
+    filename: 'app/bundle.js',
     path: './dist',
     publicPath: "/dist/"
   },
