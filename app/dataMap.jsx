@@ -28,7 +28,9 @@ export default class DataMap extends React.Component {
             crimeBeat: "",
             currentRange: [],
             domain: [],
-            amountCrimePerBeat: {}
+            amountCrimePerBeat: {},
+            positionTooltip: {},
+            tooltipActive: false
         };
 
         this.crimesTypeListing = {};
@@ -37,15 +39,24 @@ export default class DataMap extends React.Component {
 
         this.by_description = by_description;
 
+        // Crimes by primary type
         Object.keys(this.primary_crimes).map((crime_name,i) => {
                 this.crimesTypeListing[crime_name] = this.primary_crimes[crime_name]
             }
         );
 
+        // Crimes by description
         Object.keys(this.by_description).map((crime_name,i) => {
                 this.crimesTypeListing[crime_name] = this.by_description[crime_name]
             }
         );
+
+        // Add all cimres
+        this.crimesTypeListing["data_total_crimes_beat"] = {
+           "file_name": "data_total_crimes_beat.json",
+           "name": "Total crime per police beat",
+           "selector": "data_total_crimes_beat"
+        };
 
         console.log("Component constructed");
     }
@@ -70,6 +81,8 @@ export default class DataMap extends React.Component {
         this.generateSVG(false, null, this.state.colorScale, this.state.amountCrimePerBeat);
 
         console.log("Component updated");
+
+        //
 
     }
 
@@ -122,7 +135,9 @@ export default class DataMap extends React.Component {
             "colorScale": colorScale.colorScale,
             "amountCrimePerBeat": amountCrimePerBeat,
             "crimeCount": 0,
-            "crimeBeat": ""
+            "crimeBeat": "",
+            "positionTooltip": {},
+            "tooltipActive": false
         });
     }
 
@@ -257,13 +272,32 @@ export default class DataMap extends React.Component {
 
     clickOnBeat(event) {
         // Change the data display to the current selected area
+        // First remove any tooltips present
         if (event.target.id) {
             $("#mapArea svg path").removeClass("active");
             $(event.target).addClass("active");
+            // Add tooltip
+            let positionBeat = $(event.target).position();
+            let positionMap = $(".mapWrapper").position();
+            // Get dimensions of the beat
+            let beatPath = $(event.target)[0];
+            let beatDimensions = {
+                "height": beatPath.getBBox().height,
+                "width": beatPath.getBBox().width
+            };
+            // Determine left and top for tooltip
+            let leftPosition = positionBeat.left - positionMap.left - ( 60 - (beatDimensions["width"] / 2));
+            let tooltip = {
+                "left": leftPosition,
+                "top": (positionBeat.top - positionMap.top) - 60
+            }
+            // Update state for side display
             if (event.target.dataset.value){
                 this.setState({
                     "crimeCount": event.target.dataset.value,
-                    "crimeBeat": event.target.id
+                    "crimeBeat": event.target.id,
+                    "positionTooltip": tooltip,
+                    "tooltipActive": true
                 });
             }
         }
@@ -273,6 +307,10 @@ export default class DataMap extends React.Component {
         return (
             <div className="map">
                 <div id="dataBrowser">
+                    <h3>Totals</h3>
+                        <ul>
+                            <li className={"data_total_crimes_beat" == this.state.crimes ? "active" : ""} onClick={this.selectData.bind(this, "data_total_crimes_beat")}>Total per police beat</li>
+                        </ul>
                     <h3>Primary types</h3>
                     <ul>
                     {
@@ -291,13 +329,15 @@ export default class DataMap extends React.Component {
                     </ul>
                 </div>
                 <div className="mapWrapper">
+                    <div className="tooltip" style={{'left': this.state.positionTooltip.left, 'top': this.state.positionTooltip.top, "visibility": this.state.tooltipActive ? "visible" : "hidden"}}>
+                        <div>{`Beat: ${this.state.crimeBeat}`}</div>
+                        <div>{`Crimes: ${this.state.crimeCount}`}</div>
+                    </div>
                     <h3 className="current-crime">{this.state.crimes ? this.crimesTypeListing[this.state.crimes].name : "None selected"}</h3>
                     <div id="mapArea">
                         <svg width={ this.state.width } height={ this.state.height } onClick={this.clickOnBeat.bind(this)}></svg>
                     </div>
                     <div className="data-display">
-                        <div>{`Beat: ${this.state.crimeBeat}`}</div>
-                        <div>{`Crimes: ${this.state.crimeCount}`}</div>
                         {
                             <Legend data={this.state.crimes ? this.state.currentRange : []} domain={this.state.crimes ? this.state.domain : []}/>
                         }

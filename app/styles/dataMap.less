@@ -25,6 +25,34 @@
 	    position: absolute;
 	    top: 100px;
 	    left: 750px;
+	    z-index: 100;
+	}
+	// Tooltip
+	.tooltip {
+		position: absolute;
+	    border: 1px solid black;
+	    background-color: black;
+	    color: white;
+	    padding: 5px;
+	    border-radius: 13px;
+	    text-align: center;
+	    width: 120px;
+	    z-index: 200;
+	    &:after {
+	    	display: block;
+	    	position: absolute;
+	    	width: 0;
+		    height: 0;
+		    border-color: transparent;
+		    border-style: solid;
+		    bottom: -10px;
+		    left: 50%;
+		    margin-left: -15px;
+		    border-width: 10px 10px 0;
+		    border-top-color: #000;
+		    z-index: 200;
+		    content: "";
+	    }
 	}
 	.legend {
 		ul {
