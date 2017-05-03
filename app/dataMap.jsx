@@ -6,11 +6,6 @@ import * as d3 from "d3";
 import * as chroma from 'chroma-js/chroma.js';
 
 // Crimes
-import domestic_battery_simple from '../data/crimes_dom_beat.json';
-import murder from '../data/crimes_murder_beat.json';
-import theft_under_500 from '../data/theft_500_under.json';
-import rob_gun from '../data/rob_gun_stats.json';
-
 import { primary_types } from '../data/primary_types';
 import { by_description } from '../data/by_description';
 
