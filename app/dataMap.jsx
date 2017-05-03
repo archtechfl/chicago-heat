@@ -12,6 +12,7 @@ import theft_under_500 from '../data/theft_500_under.json';
 import rob_gun from '../data/rob_gun_stats.json';
 
 import { primary_types } from '../data/primary_types';
+import { by_description } from '../data/by_description';
 
 // Legend
 import Legend from './legend.jsx';
@@ -34,7 +35,22 @@ export default class DataMap extends React.Component {
             domain: [],
             amountCrimePerBeat: {}
         };
-        this.crimesTypeListing = primary_types;
+
+        this.crimesTypeListing = {};
+
+        this.primary_crimes = primary_types;
+
+        this.by_description = by_description;
+
+        Object.keys(this.primary_crimes).map((crime_name,i) => {
+                this.crimesTypeListing[crime_name] = this.primary_crimes[crime_name]
+            }
+        );
+
+        Object.keys(this.by_description).map((crime_name,i) => {
+                this.crimesTypeListing[crime_name] = this.by_description[crime_name]
+            }
+        );
 
         console.log("Component constructed");
     }
@@ -265,7 +281,15 @@ export default class DataMap extends React.Component {
                     <h3>Primary types</h3>
                     <ul>
                     {
-                        Object.keys(this.crimesTypeListing).map((crime_name,i) =>
+                        Object.keys(this.primary_crimes).map((crime_name,i) =>
+                            <li className={crime_name == this.state.crimes ? "active" : ""} key={i} onClick={this.selectData.bind(this, crime_name)}>{this.crimesTypeListing[crime_name].name}</li>
+                        )
+                    }
+                    </ul>
+                    <h3>By description</h3>
+                    <ul>
+                    {
+                        Object.keys(this.by_description).map((crime_name,i) =>
                             <li className={crime_name == this.state.crimes ? "active" : ""} key={i} onClick={this.selectData.bind(this, crime_name)}>{this.crimesTypeListing[crime_name].name}</li>
                         )
                     }
