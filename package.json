@@ -5,7 +5,7 @@
   "description": "Data viz using D3 and React",
   "main": "index.jsx",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "webpack-dev-server"
   },
   "keywords": [
     "ReactJS",
