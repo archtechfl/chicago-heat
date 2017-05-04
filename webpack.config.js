@@ -7,11 +7,11 @@ module.exports = {
     './app/styles/app.less',
   ],
   output: {
-    filename: 'app/bundle.js',
+    filename: 'bundle.js',
     path: './dist',
     publicPath: "/dist/"
   },
-  devtool: 'source-map',
+  // devtool: 'source-map',
   devServer: { inline: false },
   module: {
     loaders: [

@@ -6,14 +6,14 @@ import * as d3 from "d3";
 import * as chroma from 'chroma-js/chroma.js';
 
 // Crimes
-import { primary_types } from '../data/primary_types';
-import { by_description } from '../data/by_description';
+import { primary_types } from './data/primary_types';
+import { by_description } from './data/by_description';
 
 // Legend
 import Legend from './legend.jsx';
 
 // Data
-import beats from '../data/chicago_beats.geo.json';
+import beats from './data/chicago_beats.geo.json';
 
 export default class DataMap extends React.Component {
 
@@ -107,7 +107,7 @@ export default class DataMap extends React.Component {
 
             $("#mapArea svg path").removeClass("active");
 
-            var endpoint = `../data/${this.crimesTypeListing[crimeKey]["file_name"]}`;
+            var endpoint = `./data/${this.crimesTypeListing[crimeKey]["file_name"]}`;
 
             fetch(endpoint)
               .then(blob => blob.json())

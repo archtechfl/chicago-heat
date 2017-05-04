@@ -3,5 +3,8 @@ dist/
 data/*.json
 data/primary
 data/description
+app/data/*.json
+app/data/primary
+app/data/description
 data_files/
 .DS_Store
