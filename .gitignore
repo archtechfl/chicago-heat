@@ -1,5 +1,7 @@
 node_modules/
 dist/
-data/
+data/*.json
+data/primary
+data/description
 data_files/
 .DS_Store
