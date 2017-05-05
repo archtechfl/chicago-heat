@@ -446,7 +446,7 @@ var by_description_district = [
  },
  {
    "file_name": "DATA-district-desc-DECEPTIVE-PRACTICE-FINAN-EXPLOIT-ELDERLY-DISABLED.json",
-   "name": "Deceptive practice: finan exploit elderly disabled",
+   "name": "Deceptive practice: financial exploitation elderly disabled",
    "selector": "DATA-district-desc-DECEPTIVE-PRACTICE-FINAN-EXPLOIT-ELDERLY-DISABLED"
  },
  {

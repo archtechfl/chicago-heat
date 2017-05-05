@@ -446,7 +446,7 @@ var by_description = [
  },
  {
    "file_name": "data_deceptive_practice_finan_exploit_elderly_disabled.json",
-   "name": "Deceptive practice: finan exploit elderly disabled",
+   "name": "Deceptive practice: financial exploitation elderly disabled",
    "selector": "data_deceptive_practice_finan_exploit_elderly_disabled"
  },
  {
