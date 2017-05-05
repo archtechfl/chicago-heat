@@ -4,6 +4,7 @@ import React from 'react';
 // Third party packages
 import * as d3 from "d3";
 import * as chroma from 'chroma-js/chroma.js';
+import $ from 'jquery';
 
 // Crimes
 import { primary_types } from './data/primary_types';
@@ -316,45 +317,51 @@ export default class DataMap extends React.Component {
 
     render(){
         return (
-            <div className="map">
-                <div id="dataBrowser">
-                    <h3>Totals</h3>
+            <section className="map-section">
+                <div className="geography-switcher">
+                    <div className="beat-geo active">By Beat</div>
+                    <div className="district-geo">By District</div>
+                </div>
+                <div className="map">
+                    <div id="dataBrowser">
+                        <h3>Totals</h3>
+                            <ul>
+                                <li className={"data_total_crimes_beat" == this.state.crimes ? "active" : ""} onClick={this.selectData.bind(this, "data_total_crimes_beat")}>Total per police beat</li>
+                            </ul>
+                        <h3>Primary types</h3>
                         <ul>
-                            <li className={"data_total_crimes_beat" == this.state.crimes ? "active" : ""} onClick={this.selectData.bind(this, "data_total_crimes_beat")}>Total per police beat</li>
-                        </ul>
-                    <h3>Primary types</h3>
-                    <ul>
-                    {
-                        Object.keys(this.primary_crimes).map((crime_name,i) =>
-                            <li className={crime_name == this.state.crimes ? "active" : ""} key={i} onClick={this.selectData.bind(this, crime_name)}>{this.crimesTypeListing[crime_name].name}</li>
-                        )
-                    }
-                    </ul>
-                    <h3>By description</h3>
-                    <ul>
-                    {
-                        Object.keys(this.by_description).map((crime_name,i) =>
-                            <li className={crime_name == this.state.crimes ? "active" : ""} key={i} onClick={this.selectData.bind(this, crime_name)}>{this.crimesTypeListing[crime_name].name}</li>
-                        )
-                    }
-                    </ul>
-                </div>
-                <div className="mapWrapper">
-                    <div className="tooltip" style={{'left': this.state.positionTooltip.left, 'top': this.state.positionTooltip.top, "visibility": this.state.tooltipActive ? "visible" : "hidden"}}>
-                        <div><span className="tooltip-label">Beat: </span><span className="tooltip-data">{this.state.crimeBeat}</span></div>
-                        <div><span className="tooltip-label">Crimes: </span><span className="tooltip-data">{this.state.crimeCount}</span></div>
-                    </div>
-                    <h3 className="current-crime">{this.state.crimes ? this.crimesTypeListing[this.state.crimes].name : "None selected"}</h3>
-                    <div id="mapArea">
-                        <svg width={ this.state.width } height={ this.state.height } onClick={this.clickOnBeat.bind(this)}></svg>
-                    </div>
-                    <div className="data-display">
                         {
-                            <Legend data={this.state.crimes ? this.state.currentRange : []} domain={this.state.crimes ? this.state.domain : []}/>
+                            Object.keys(this.primary_crimes).map((crime_name,i) =>
+                                <li className={crime_name == this.state.crimes ? "active" : ""} key={i} onClick={this.selectData.bind(this, crime_name)}>{this.crimesTypeListing[crime_name].name}</li>
+                            )
                         }
+                        </ul>
+                        <h3>By description</h3>
+                        <ul>
+                        {
+                            Object.keys(this.by_description).map((crime_name,i) =>
+                                <li className={crime_name == this.state.crimes ? "active" : ""} key={i} onClick={this.selectData.bind(this, crime_name)}>{this.crimesTypeListing[crime_name].name}</li>
+                            )
+                        }
+                        </ul>
+                    </div>
+                    <div className="mapWrapper">
+                        <div className="tooltip" style={{'left': this.state.positionTooltip.left, 'top': this.state.positionTooltip.top, "visibility": this.state.tooltipActive ? "visible" : "hidden"}}>
+                            <div><span className="tooltip-label">Beat: </span><span className="tooltip-data">{this.state.crimeBeat}</span></div>
+                            <div><span className="tooltip-label">Crimes: </span><span className="tooltip-data">{this.state.crimeCount}</span></div>
+                        </div>
+                        <h3 className="current-crime">{this.state.crimes ? this.crimesTypeListing[this.state.crimes].name : "None selected"}</h3>
+                        <div id="mapArea">
+                            <svg width={ this.state.width } height={ this.state.height } onClick={this.clickOnBeat.bind(this)}></svg>
+                        </div>
+                        <div className="data-display">
+                            {
+                                <Legend data={this.state.crimes ? this.state.currentRange : []} domain={this.state.crimes ? this.state.domain : []}/>
+                            }
+                        </div>
                     </div>
                 </div>
-            </div>
+            </section>
         );
     }
 
