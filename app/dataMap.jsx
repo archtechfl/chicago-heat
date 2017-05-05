@@ -13,7 +13,7 @@ import { by_description } from './data/by_description';
 import Legend from './legend.jsx';
 
 // Data
-import beats from './data/chicago_beats.geo.json';
+// import beats from './data/chicago_beats.geo.json';
 
 export default class DataMap extends React.Component {
 
@@ -22,8 +22,8 @@ export default class DataMap extends React.Component {
 
         this.state = {
             crimes: "",
-            width: 800,
-            height: 800,
+            width: 600,
+            height: 750,
             crimeCount: 0,
             crimeBeat: "",
             currentRange: [],
@@ -89,13 +89,24 @@ export default class DataMap extends React.Component {
     componentDidMount(){
 
         // Get geographic data
-        var geoJsonObj = beats;
+
+        let endpoint = "./data/chicago_beats.geo.json";
+
+        fetch(endpoint)
+              .then(blob => blob.json())
+              .then(data => this.loadInitialMap(data));
+
+        console.log("Component mounted");
+
+    }
+
+    loadInitialMap(data){
+
+        var geoJsonObj = data;
 
         var colorScale = this.getColorScale(0, 0);
 
         this.generateSVG(true, geoJsonObj, colorScale["colorScale"], {});
-
-        console.log("Component mounted");
 
     }
 
