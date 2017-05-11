@@ -251,8 +251,15 @@ export default class DataMap extends React.Component {
         // chroma.scale returns single color as string so need to maintain as array
         if (domain.length < 2) {
             domain_length = 1;
-            colorRange = chroma.scale(['lightyellow', 'lightyellow']).colors(domain_length);
-            colorRange = [colorRange];
+            if (domain[0] == 2){
+                // If start number is 2 in domain (meaning there is a min of 1), so domain is [1,2]
+                domain_length = 2;
+                colorRange = chroma.scale(['lightyellow', 'purple']).colors(domain_length);
+            } else {
+                // If there is just one value (1), nothing else
+                colorRange = chroma.scale(['lightyellow', 'lightyellow']).colors(domain_length);
+                colorRange = [colorRange];
+            }
         } else {
             domain_length = domain.length + 1;
             colorRange = chroma.scale(['lightyellow', 'orange', 'red', 'purple']).colors(domain_length);
