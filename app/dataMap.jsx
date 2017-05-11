@@ -311,9 +311,9 @@ export default class DataMap extends React.Component {
                 "top": (positionBeat.top - positionMap.top) - 55
             }
             // Update state for side display
-            if (event.target.dataset.value){
+            if (event.target.attributes["data-value"].value){
                 this.setState({
-                    "crimeCount": event.target.dataset.value,
+                    "crimeCount": event.target.attributes["data-value"].value,
                     "crimeBeat": event.target.id,
                     "positionTooltip": tooltip,
                     "tooltipActive": true
