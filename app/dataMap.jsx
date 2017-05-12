@@ -31,7 +31,8 @@ export default class DataMap extends React.Component {
             domain: [],
             amountCrimePerBeat: {},
             positionTooltip: {},
-            tooltipActive: false
+            tooltipActive: false,
+            min: 0
         };
 
         this.crimesTypeListing = {};
@@ -149,7 +150,8 @@ export default class DataMap extends React.Component {
             "crimeCount": 0,
             "crimeBeat": "",
             "positionTooltip": {},
-            "tooltipActive": false
+            "tooltipActive": false,
+            "min": min
         });
     }
 
@@ -230,6 +232,9 @@ export default class DataMap extends React.Component {
     getColorScale(min, max){
         // Retrieve a color scale based on the number of thresholds in the dataset, ranging from lightyellow
         // to purple
+
+        console.log(min);
+
         var steps = (max - min) / 10;
 
         var domain = [Math.ceil(min + (steps * 1))];
@@ -363,7 +368,7 @@ export default class DataMap extends React.Component {
                         </div>
                         <div className="data-display">
                             {
-                                <Legend data={this.state.crimes ? this.state.currentRange : []} domain={this.state.crimes ? this.state.domain : []}/>
+                                <Legend data={this.state.crimes ? this.state.currentRange : []} domain={this.state.crimes ? this.state.domain : []} min={this.state.min}/>
                             }
                         </div>
                     </div>

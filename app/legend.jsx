@@ -29,13 +29,14 @@ export default class Legend extends React.Component {
     calculateLegend(nextProps){
         // Determine the legend display
         var domain = nextProps.domain;
+        var min = nextProps.min;
 
         var legend = [];
         // Determine start range
         if (domain[0] > 2) {
-            legend.push(`1 - ${domain[0] - 1}`);
+            legend.push(`${min} - ${domain[0] - 1}`);
         } else {
-            legend.push('1');
+            legend.push(min);
         }
         domain.map((value,i) => {
                 if ( ((i + 1) < domain.length ) && ( value != ( domain[i + 1] - 1 ) ) ){
