@@ -330,10 +330,6 @@ export default class DataMap extends React.Component {
     render(){
         return (
             <section className="map-section">
-                <div className="geography-switcher">
-                    <div className="beat-geo active">By Beat</div>
-                    <div className="district-geo">By District</div>
-                </div>
                 <div className="map">
                     <div id="dataBrowser">
                         <h3>Totals</h3>
