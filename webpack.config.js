@@ -7,7 +7,7 @@ module.exports = {
     './app/styles/app.less',
   ],
   output: {
-    filename: 'bundle.js',
+    filename: 'bundle.min.js',
     path: './dist',
     publicPath: "/dist/"
   },
@@ -36,6 +36,7 @@ module.exports = {
     ]
   },
   plugins: [
-      new ExtractTextPlugin("styles/style.css", {allChunks: true})
+      new ExtractTextPlugin("styles/style.css", {allChunks: true}),
+      new webpack.optimize.UglifyJsPlugin({minimize: true})
   ]
 }
