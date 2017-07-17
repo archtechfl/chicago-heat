@@ -301,7 +301,7 @@ export default class DataMap extends React.Component {
             $("#mapArea svg path").removeClass("active");
             $(event.target).addClass("active");
             // Add tooltip
-            let positionBeat = $(event.target)[0].getBoundingClientRect()
+            let positionBeat = $(event.target)[0].getBoundingClientRect();
             let positionMap = $(".mapWrapper").position();
             // Get dimensions of the beat
             let beatPath = $(event.target)[0];
