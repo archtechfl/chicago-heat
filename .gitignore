@@ -1,2 +1,10 @@
 node_modules/
 dist/
+data/*.json
+app/data/*.json
+data/primary/*.json
+data/description/*.json
+data/primary_district/*.json
+data/description_district/*.json
+data_files/
+.DS_Store

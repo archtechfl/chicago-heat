@@ -11,7 +11,7 @@ module.exports = {
     path: './dist',
     publicPath: "/dist/"
   },
-  devtool: 'source-map',
+  // devtool: 'source-map',
   devServer: { inline: false },
   module: {
     loaders: [
@@ -24,6 +24,14 @@ module.exports = {
         test: /\.less$/, 
         exclude: /node_modules/, 
         loader: ExtractTextPlugin.extract("style?sourceMap", "css?sourceMap!autoprefixer?browsers=last 5 version!less?sourceMap"),
+      },
+      {
+        test: /\.css$/,
+        loader: 'css-loader',
+      },
+      {
+        test: /\.json$/,
+        loader: 'json-loader'
       },
     ]
   },
